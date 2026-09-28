@@ -2,9 +2,13 @@ node_modules/
 dist/
 coverage/
 *.log
+
+# Local environment files. .env.example is the committed template.
 .env
 .env.*
 !.env.example
+
 .DS_Store
 .idea/
 .vscode/
+*.tsbuildinfo

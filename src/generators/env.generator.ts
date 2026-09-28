@@ -127,24 +127,31 @@ export function buildEnvFiles(options: {
   const sections = [...buildEnvSections(options.addons), ...(options.extraSections ?? [])];
   const overrides = options.overrides ?? {};
 
-  const resolve: EnvValueResolver = (key) => {
-    if (key in overrides) return { value: overrides[key]! };
-    if (isSecretKey(key)) return { value: generateSecret(), comment: GENERATED_COMMENT };
-    return undefined;
-  };
+  const applyOverrides: EnvValueResolver = (key) =>
+    key in overrides ? { value: overrides[key]! } : undefined;
+
+  /** Only `.env` gets generated secrets; `.env.example` must stay a template. */
+  const applyOverridesAndSecrets: EnvValueResolver = (key, currentValue) =>
+    applyOverrides(key, currentValue) ??
+    (isSecretKey(key) ? { value: generateSecret(), comment: GENERATED_COMMENT } : undefined);
 
   const exampleBlocks = sections.map((section) => renderEnvSection(section, { commented: true }));
   const activeBlocks = sections.map((section) => renderEnvSection(section, { commented: false }));
 
-  const envExample = [trimBlankEdges(options.baseExample), '', exampleBlocks.join('\n\n')].join('\n');
+  // Overrides are applied to the example too, otherwise the documented value
+  // would contradict the value the generated project actually uses.
+  const envExample = [
+    substituteEnvValues(trimBlankEdges(options.baseExample), applyOverrides),
+    '',
+    substituteEnvValues(exampleBlocks.join('\n\n'), applyOverrides),
+  ].join('\n');
 
   const env = [
     ENV_HEADER,
     '',
-    trimBlankEdges(substituteEnvValues(uncommentEnvText(options.baseExample), resolve)),
+    substituteEnvValues(uncommentEnvText(trimBlankEdges(options.baseExample)), applyOverridesAndSecrets),
     '',
-    substituteEnvValues(activeBlocks.join('\n\n'), resolve),
-    '',
+    substituteEnvValues(activeBlocks.join('\n\n'), applyOverridesAndSecrets),
   ].join('\n');
 
   return { env, envExample };

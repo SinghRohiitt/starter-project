@@ -1,7 +1,13 @@
 import { join } from 'node:path';
 import type { AddonManifest, GenerationPlan, ProjectConfig, ResolvedAddon } from '../types.js';
 import { CliError } from '../types.js';
-import { copyTemplateDir, findTemplatesRoot, readJsonFile, restoreSentinelFiles } from '../utils/filesystem.js';
+import {
+  copyTemplateDir,
+  findTemplatesRoot,
+  readJsonFile,
+  restoreSentinelFiles,
+  writeTextFile,
+} from '../utils/filesystem.js';
 
 /** Base templates the CLI knows how to build, keyed by the id used in `addon.json`. */
 export const BASE_TEMPLATES = {
@@ -81,6 +87,46 @@ export function copyPlan(config: ProjectConfig, plan: GenerationPlan): void {
   }
   restoreSentinelFiles(config.targetDir);
 }
+
+/**
+ * Rewrites `src/bootstrap/index.ts` with one side-effect import per optional
+ * feature.
+ *
+ * The imports are written out explicitly instead of being discovered at runtime:
+ * a missing import then fails at compile time, and the generated project needs no
+ * directory scanning or top-level await to boot.
+ */
+export function writeBootstrapIndex(targetDir: string, addons: ResolvedAddon[]): void {
+  const modules = addons.flatMap((addon) => addon.manifest.bootstrap ?? []);
+
+  const contents =
+    modules.length === 0
+      ? BOOTSTRAP_HEADER
+      : [
+          BOOTSTRAP_HEADER,
+          '',
+          '// Registered by create-rohit-app for the selected features:',
+          ...modules.map((module) => `import './${module}.js';`),
+          '',
+        ].join('\n');
+
+  writeTextFile(join(targetDir, 'src', 'bootstrap', 'index.ts'), contents);
+}
+
+const BOOTSTRAP_HEADER = [
+  '/**',
+  ' * Optional features register their startup and shutdown hooks here.',
+  ' *',
+  ' * create-rohit-app writes the import list below when it scaffolds a project with',
+  ' * a database or cache. The empty version is what the base template ships with, so',
+  ' * the template is a complete, runnable project on its own.',
+  ' *',
+  ' * To add one by hand, drop a module in this directory and import it below:',
+  ' *',
+  " *   import './my-feature.js';",
+  ' */',
+  'export {};',
+].join('\n');
 
 /** Labels for the CLI summary, e.g. `['Prisma', 'JWT', 'Redis']`. */
 export function describeAddons(plan: GenerationPlan): string[] {

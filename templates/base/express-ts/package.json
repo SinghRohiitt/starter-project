@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Express + TypeScript backend starter",
+  "description": "Express + TypeScript backend",
   "main": "dist/server.js",
   "engines": {
     "node": ">=18.0.0"
@@ -15,10 +15,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.10.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"

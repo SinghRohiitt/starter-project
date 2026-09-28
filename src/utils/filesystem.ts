@@ -75,13 +75,16 @@ export function removeDir(target: string): void {
  * `overwrite` is false for the base template — a collision there means we are
  * about to clobber something that is not ours — and true when layering addons,
  * where an addon replacing a base file is exactly the point.
+ *
+ * An existing but empty destination is allowed in both cases: the user asked for
+ * that directory, and it holds nothing of theirs to lose.
  */
 export function copyTemplateDir(src: string, dest: string, overwrite: boolean): void {
   if (!fse.pathExistsSync(src)) {
     throw new Error(`Template directory not found: ${src}`);
   }
-  if (!overwrite && fse.pathExistsSync(dest)) {
-    throw new Error(`Refusing to overwrite existing directory: ${dest}`);
+  if (!overwrite && fse.pathExistsSync(dest) && !isEmptyDirectory(dest)) {
+    throw new Error(`Refusing to overwrite non-empty directory: ${dest}`);
   }
   fse.ensureDirSync(dirname(dest));
   fse.copySync(src, dest, { overwrite, errorOnExist: !overwrite, dereference: true });

@@ -49,6 +49,11 @@ export type AddonManifest = {
   env: Record<string, string>;
   /** `KEY=value` pairs written *only* to `.env.example`, commented out. */
   optionalEnv: Record<string, string>;
+  /**
+   * Modules the addon places in `src/bootstrap/`, without the extension. Each one
+   * registers lifecycle hooks and is imported by the generated bootstrap index.
+   */
+  bootstrap: string[];
   /** Commands run inside the generated project after `install` (e.g. `prisma generate`). */
   postInstall: string[];
 };

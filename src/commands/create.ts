@@ -1,7 +1,7 @@
 import { basename } from 'node:path';
 import type { Logger, ProjectConfig } from '../types.js';
 import { CliError } from '../types.js';
-import { copyPlan, planProject } from '../generators/project.generator.js';
+import { copyPlan, planProject, writeBootstrapIndex } from '../generators/project.generator.js';
 import { writePackageJson } from '../generators/package.generator.js';
 import { writeEnvFiles } from '../generators/env.generator.js';
 import { isEmptyDirectory, listEntries, pathExists, readOwnPackageJson, removeDir } from '../utils/filesystem.js';
@@ -59,6 +59,7 @@ export async function createProject(projectNameArg: string, deps: CreateDeps): P
   const structure = logger.start('Creating project...');
   try {
     copyPlan(config, plan);
+    writeBootstrapIndex(config.targetDir, plan.addons);
     writePackageJson(config.targetDir, config, plan.addons);
     writeEnvFiles(config.targetDir, plan.addons);
   } catch (err) {
