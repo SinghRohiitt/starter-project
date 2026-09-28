@@ -1,0 +1,57 @@
+{
+  "name": "create-rohit-app",
+  "version": "0.1.0",
+  "description": "Scaffold production-ready Node.js backend projects (Express + TypeScript) with optional Prisma, Mongoose, JWT auth, Redis and Docker.",
+  "keywords": [
+    "cli",
+    "scaffold",
+    "generator",
+    "boilerplate",
+    "express",
+    "typescript",
+    "prisma",
+    "mongoose",
+    "jwt",
+    "redis",
+    "docker"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "create-rohit-app": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsup && node scripts/postbuild.mjs",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.5.3",
+    "chalk": "^5.4.1",
+    "commander": "^12.1.0",
+    "execa": "^9.5.2",
+    "fs-extra": "^11.2.0",
+    "ora": "^8.1.1",
+    "validate-npm-package-name": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.10.5",
+    "@types/validate-npm-package-name": "^4.0.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
